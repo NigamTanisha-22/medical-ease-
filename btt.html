@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MEDICAL HELP SYSTEM - LUCKNOW</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #1e90ff;
+  color: black;
+  text-transform: uppercase;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+}
+
+h1 {
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  margin-top: 20px;
+  border: 2px solid black;
+}
+
+.doctor {
+  border: 1px solid black;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+button {
+  margin-top: 10px;
+  margin-right: 10px;
+  padding: 10px 15px;
+  background: black;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#notification {
+  background: #ffeb3b;
+  padding: 15px;
+  border: 2px dashed black;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="notification" style="display:none;"></div>
+
+  <h1>MEDICATION AT EASE BY TANISHA</h1>
+
+  <input
+    type="text"
+    id="symptomInput"
+    placeholder="E.G. FEVER, COUGH, STRESS, CHEST PAIN"
+  >
+
+  <div id="results"></div>
+
+</div>
+
+<script>
+const doctors = [
+
+  { name:"DR. A.K. SINGH", hospital:"INDIRA NAGAR CLINIC, LUCKNOW", symptoms:["ASTHMA","BREATHING","TB","CHEST"] },
+  { name:"DR. RAJENDRA PRASAD", hospital:"ERA'S LUCKNOW MEDICAL COLLEGE", symptoms:["COUGH","LUNG","INFECTION"] },
+  { name:"DR. AMITA SHUKLA", hospital:"SCT TRUST HOSPITAL, ALIGANJ", symptoms:["PREGNANCY","DELIVERY","WOMEN","PERIODS"] },
+  { name:"DR. RPS MAKKAR", hospital:"PRIVATE CLINIC, LUCKNOW", symptoms:["FEVER","INFECTION","BP","DIABETES"] },
+  { name:"DR. SWATI AGGARWAL", hospital:"PRIVATE CLINIC / ONLINE CONSULT", symptoms:["FEVER","BP","DIABETES"] },
+  { name:"DR. MOHAMMAD AMIR", hospital:"NEAR KGMU, LUCKNOW", symptoms:["COUGH","ASTHMA","CHEST"] },
+  { name:"ENT SPECIALIST TEAM", hospital:"APOLLO MEDICS HOSPITAL, LUCKNOW", symptoms:["EAR","THROAT","SINUS","COLD"] },
+  { name:"ORTHOPAEDIC SPECIALIST", hospital:"GANGA MEDICAL CENTER", symptoms:["BONE","FRACTURE","JOINT","BACK"] },
+  { name:"CARDIOLOGY TEAM", hospital:"MAX SUPER SPECIALITY HOSPITAL", symptoms:["HEART","CHEST PAIN","BP"] },
+  { name:"PSYCHIATRY TEAM", hospital:"NIRVAN HOSPITAL, LUCKNOW", symptoms:["STRESS","ANXIETY","DEPRESSION"] },
+  { name:"DR. K.N.S. SINGH", hospital:"KNS MEMORIAL HOSPITAL", symptoms:["BRAIN","NERVE","HEADACHE"] },
+
+  /* ===== NEW DOCTORS ADDED BELOW ===== */
+
+  { name:"LT. COL. DR. MAHIPAL SINGH (RETD.)", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["SINUS","EAR","THROAT","HEARING","TONSIL","NASAL"] },
+
+  { name:"DR. SHEFALI SINGH", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["FEVER","COUGH","COLD","INFECTION","WEAKNESS","BODY ACHE","BP","DIABETES"] },
+
+  { name:"DR. SUNIL DABADGHAO", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["ANEMIA","LEUKEMIA","BLOOD","BLEEDING","CLOTTING"] },
+
+  { name:"DR. AMRITA TIWARI", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["PREGNANCY","MENSTRUAL","PELVIC","OVARIAN","GYN"] },
+
+  { name:"DR. AMRITESH RANJAN MISHRA", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["ASTHMA","BRONCHITIS","PNEUMONIA","COPD","CHEST INFECTION"] },
+
+  { name:"DR. K. MANOJ KUMAR", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["ACNE","ECZEMA","FUNGAL","SKIN","HAIR","DERMATITIS"] },
+
+  { name:"DR. RAJNEESH KUMAR", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["HEART","ARRHYTHMIA","CHEST PAIN","BP"] },
+
+  { name:"DR. SHUBHAM KEJRIWAL", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["JOINT","FRACTURE","BONE","BACK PAIN"] },
+
+  { name:"DR. DINESH RAHAR", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["URINE","KIDNEY","STONE","PROSTATE"] },
+
+  { name:"DR. JYOTSANA SINGH & DR. PAYAL GARG", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["EYE","VISION","CONJUNCTIVITIS","CATARACT"] },
+
+  { name:"DR. NISHA YADAV", hospital:"DR. OP CHAUDHARY HOSPITAL, LUCKNOW", symptoms:["DIET","NUTRITION","WEIGHT","DIGESTION","DIABETES"] }
+
+];
+
+let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+showAppointments();
+
+const symptomInput = document.getElementById("symptomInput");
+const results = document.getElementById("results");
+
+symptomInput.addEventListener("input", () => {
+  const input = symptomInput.value.toUpperCase();
+  results.innerHTML = "";
+  if(input.length < 2) return;
+
+  doctors.forEach(doc => {
+    if(doc.symptoms.some(sym => input.includes(sym))){
+      const docDiv = document.createElement("div");
+      docDiv.classList.add("doctor");
+      docDiv.innerHTML = `<strong>${doc.name}</strong><br>${doc.hospital}<br>`;
+
+      const bookBtn = document.createElement("button");
+      bookBtn.textContent = "BOOK APPOINTMENT";
+      bookBtn.addEventListener("click", () => bookAppointment(doc.name, doc.hospital));
+
+      const qualBtn = document.createElement("button");
+      qualBtn.textContent = "CHECK QUALIFICATION";
+      qualBtn.addEventListener("click", () => openGoogle(`${doc.name} ${doc.hospital} qualification`));
+
+      docDiv.appendChild(bookBtn);
+      docDiv.appendChild(qualBtn);
+
+      results.appendChild(docDiv);
+    }
+  });
+});
+
+function bookAppointment(name, hospital){
+  const patientName = prompt("ENTER YOUR NAME");
+  const phone = prompt("ENTER 10 DIGIT PHONE NUMBER");
+
+  if(!patientName || !phone || !/^\d{10}$/.test(phone)){
+    alert("INVALID DETAILS. TRY AGAIN.");
+    return;
+  }
+
+  const slot = prompt("ENTER TIME SLOT (E.G. 10:30 AM)");
+  if(!slot) return;
+
+  if(appointments.length > 0){
+    const choice = confirm("YOU ALREADY HAVE APPOINTMENTS. REMOVE OLD APPOINTMENTS?");
+    if(choice){
+      appointments = [];
+    }
+  }
+
+  appointments.push({ doctor: name, hospital, patient: patientName, phone, slot });
+  localStorage.setItem("appointments", JSON.stringify(appointments));
+  alert("APPOINTMENT BOOKED SUCCESSFULLY");
+  showAppointments();
+}
+
+function showAppointments(){
+  const note = document.getElementById("notification");
+  if(appointments.length === 0){
+    note.style.display = "none";
+    return;
+  }
+
+  note.style.display = "block";
+  note.innerHTML = "<strong>🔔 APPOINTMENT RECEIPTS</strong><br><br>";
+
+  appointments.forEach((a,i)=>{
+    note.innerHTML += `${i+1}.<br>DOCTOR: ${a.doctor}<br>HOSPITAL: ${a.hospital}<br>PATIENT: ${a.patient}<br>PHONE: ${a.phone}<br>TIME: ${a.slot}<br><br>`;
+  });
+
+  note.innerHTML += `<button onclick="clearAppointments()">CLEAR ALL</button>`;
+}
+
+function clearAppointments(){
+  appointments = [];
+  localStorage.removeItem("appointments");
+  document.getElementById("notification").style.display = "none";
+}
+
+function openGoogle(query){
+  window.open("https://www.google.com/search?q="+encodeURIComponent(query), "_blank");
+}
+</script>
+
+</body>
+</html>
+
+
